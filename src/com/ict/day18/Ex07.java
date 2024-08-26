@@ -33,7 +33,7 @@ public class Ex07 {
 			fos = new FileOutputStream(out_file);
 			bos = new BufferedOutputStream(fos);
 			
-			int b = 0 ;
+			int b=0;
 			while ((b=bis.read()) != -1) {
 				bos.write(b);
 			}

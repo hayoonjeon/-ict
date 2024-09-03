@@ -1,45 +1,44 @@
-package com.ict.day25;
+package com.ict.day26;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.Scanner;
 
-public class Ex08_JDBC {
+public class Ex03_PreparedStatement {
 	public static void main(String[] args) {
-		// Scanner를 이용해서 
-        // 고객의 이름과 주소를 받아서 둘리의 이름과 주소를 변경 후 
-		// customer 테이블에 확인 
-		Scanner scan = new Scanner(System.in);
-		System.out.print("이름 : ");
-		String name = scan.nextLine();
-
-		System.out.print("주소 : ");
-		String address = scan.nextLine();
-		
+		// DB에 접속할 수 있도록 도와 주는 클래스 
 		Connection conn = null;
-		Statement stmt = null;
+		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		int result = 0 ;
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
+			
 			String url = "jdbc:mysql://localhost:3306/ictedu_db";
 			String user = "ictedu";
 			String password = "1111";
 			
 			conn = DriverManager.getConnection(url, user, password);
-			String sql = "update customer set name='"+ name +"', address='"+address +"' where name='둘리'";
-			stmt = conn.createStatement();
-			result = stmt.executeUpdate(sql);
+			
+			// 마이콜 정보 삽입하기 (마이콜, 전라도, 010-1111-2222)
+			String sql = "insert into customer(name, address, phone) "
+					+ " values(?,?,?)";
+			
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, "마이콜");
+			pstmt.setString(2, "전라도");
+			pstmt.setString(3, "010-7777-9999");
+			
+			result = pstmt.executeUpdate();
 			if(result>0) {
 				sql = "select * from customer";
-				rs = stmt.executeQuery(sql);
-				while (rs.next()) {
+				rs = pstmt.executeQuery(sql);
+				while(rs.next()) {
 					System.out.print(rs.getInt(1)+"\t");
 					System.out.print(rs.getString(2)+"\t");
 					System.out.print(rs.getString(3)+"\t");
-					System.out.print(rs.getString(4)+"\n");
+					System.out.println(rs.getString(4));
 				}
 			}
 		} catch (Exception e) {
@@ -47,7 +46,7 @@ public class Ex08_JDBC {
 		} finally {
 			try {
 				rs.close();
-				stmt.close();
+				pstmt.close();
 				conn.close();
 			} catch (Exception e2) {
 				System.out.println(e2);
